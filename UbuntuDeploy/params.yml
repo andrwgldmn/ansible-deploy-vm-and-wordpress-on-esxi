@@ -1,0 +1,40 @@
+---
+Global:
+  Workingdir: "ISO"     # Temp directory on the Ansible Controller
+  ISOName: ubuntu-2004-autoinstall
+  ISODatastore: 480_ssd                                     # The vSphere Datastore where the Ubuntu ISO will be stored
+  ISODatastoreDir: /ISO                                           # The vSphere Datastore directory where the Ubuntu ISO will be stored. This directory is created if it doesn't exist.
+  ISODatacenter: 480_ssd                               # The vSphere Datacenter to which the vSphere ISODatastore belongs
+
+vCenter:
+  Name: vcenter_name                 # vCenter Name
+  User: vcenter_username              # vCenter Username
+  Password: vcenter_password                             # vCenter Password
+
+VMsToDeploy:
+  - Name: vm_name                        # The VM's name
+    Deploy: true                                 # If set to "true" the VM is deployed
+    Placement:
+      Datacenter: vcenter_datacenter             # The VM's vCenter Datacenter
+      Cluster: vcenter_cluster                          # The VM's vSphere Cluster 
+      Datastore: datastore_in_cluster                   # The VM's vSphere datastore
+      Folder: /                                  # The VM's vCenter VM folder
+    Configuration:
+      VM:
+        GuestID: ubuntu64Guest                   # The VM's Guest OS ID
+        PowerState: poweredon                    # The VM's Power State
+      Storage:
+        DiskSize: 25                             # The VM's disksize in GB
+        DiskType: thin                           # The VM's Disk Type
+        SCSIController: paravirtual              # The VM's SCSI Adapter
+      Compute:
+        MemorySize: 2048                         # The VM's memory size in MB
+        CPUs: 1                                  # The VM's number of CPUs
+        Cores: 1                                 # The VM's number of Cores
+      Network:
+        Portgroup: VM Network                     # The VM's vSphere Portgroup
+        NetworkAdapter: vmxnet3                  # The VM's Network Adapter
+      OS:
+        User: ubuntu                             # Ubuntu OS username
+        Password: password                       # Ubuntu OS password
+        Hostname: ubuntuserver                # Ubuntu OS hostname

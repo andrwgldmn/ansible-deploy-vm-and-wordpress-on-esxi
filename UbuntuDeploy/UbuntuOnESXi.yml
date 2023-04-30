@@ -1,0 +1,81 @@
+---
+- hosts: localhost
+  name: UbuntuOnESXi.yml
+  vars_files:
+    - params.yml
+  gather_facts: false
+
+  pre_tasks:
+  
+    - name: install packages
+      become: true
+      become_method: sudo
+      apt:
+        pkg: 
+          - isolinux
+          - xorriso
+          - sed
+          - curl
+        state: latest
+        update_cache: true
+        
+  tasks:
+
+    - name: Allow execution of autoinstall generator
+      ansible.builtin.file:
+        path: "{{ Global.Workingdir }}/ubuntu-autoinstall-generator.sh"
+        mode: '0755'
+
+    - name: Create Autoinstall Ubuntu ISO
+      shell: "{{ Global.Workingdir }}/ubuntu-autoinstall-generator.sh -a -u {{ Global.Workingdir }}/user-data -d {{ Global.Workingdir }}/{{ Global.ISOName }}.iso"
+      changed_when: false
+
+    - name: Upload the custom Ubuntu ISO(s) to the vSphere datastore
+      community.vmware.vsphere_copy:
+        hostname: "{{ vCenter.Name }}"
+        username: "{{ vCenter.User }}"
+        password: "{{ vCenter.Password }}"
+        validate_certs: false
+        datacenter: "{{ Global.ISODatacenter }}"
+        src: "{{ Global.Workingdir }}/{{ Global.ISOName }}.iso"
+        datastore: "{{ Global.ISODatastore }}"
+        path: "{{ Global.ISODatastoreDir }}/{{ Global.ISOName }}.iso"
+      loop: "{{ VMsToDeploy }}"
+      when: item.Deploy
+
+    - name: Deploy Ubuntu VM(s)
+      community.vmware.vmware_guest:
+        hostname: "{{ vCenter.Name }}"
+        username: "{{ vCenter.User }}"
+        password: "{{ vCenter.Password }}"
+        validate_certs: false
+        name: "{{ item.Name }}"
+        state: "{{ item.Configuration.VM.PowerState }}"
+        guest_id: "{{ item.Configuration.VM.GuestID }}"
+        datacenter: "{{ item.Placement.Datacenter }}"
+        cluster: "{{ item.Placement.Cluster }}"
+        folder: "{{ item.Placement.Folder }}"
+        disk:
+          - size_gb: "{{ item.Configuration.Storage.DiskSize }}"
+            type: "{{ item.Configuration.Storage.DiskType }}"
+            datastore: "{{ item.Placement.Datastore }}"
+        hardware:
+          memory_mb: "{{ item.Configuration.Compute.MemorySize }}"
+          num_cpus: "{{ item.Configuration.Compute.CPUs }}"
+          num_cpu_cores_per_socket: "{{ item.Configuration.Compute.Cores }}"
+          scsi: "{{ item.Configuration.Storage.SCSIController }}"
+        networks:
+          - name: "{{ item.Configuration.Network.Portgroup }}"
+            device_type: "{{ item.Configuration.Network.NetworkAdapter }}"
+        cdrom:
+          - controller_number: 0
+            unit_number: 0
+            type: iso
+            iso_path: "[{{ Global.ISODatastore }}] {{ Global.ISODatastoreDir }}/{{ Global.ISOName }}.iso"
+            state: present
+        annotation: |
+                    *** Auto-Deployed by Ansible ***
+                    Username: {{ item.Configuration.OS.User }}
+                    Password: {{ item.Configuration.OS.Password }}
+      loop: "{{ VMsToDeploy }}"
+      when: item.Deploy

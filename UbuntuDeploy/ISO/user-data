@@ -1,0 +1,13 @@
+#cloud-config
+autoinstall:
+  version: 1
+  identity:
+    hostname: ubuntu-server
+    password: $1$xx$x2gmo6Eob2udHl0tNU2Zw0
+    username: ubuntu
+  ssh:
+    install-server: yes
+  early-commands:
+    - |
+      echo $(dig +short geoip.ubuntu.com | grep -v '\.$' | head -1) geoip.ubuntu.com >> /etc/hosts
+      sed -i '/^nameserver /d' /etc/resolv.conf
