@@ -1,0 +1,26 @@
+---
+- name: Upgrading packages
+  become: yes
+  apt: 
+    upgrade: safe
+  
+- name: Install packages
+  become: yes
+  apt:
+   pkg:
+    - apache2
+    - ghostscript
+    - libapache2-mod-php
+    - mysql-server
+    - mysql-client
+    - python3-mysqldb
+    - php
+    - php-bcmath
+    - php-curl
+    - php-imagick
+    - php-intl
+    - php-json
+    - php-mbstring
+    - php-mysql
+    - php-xml
+    - php-zip

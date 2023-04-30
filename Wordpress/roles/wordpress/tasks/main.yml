@@ -1,0 +1,21 @@
+---
+- name: Create folder for WP
+  become: true
+  file:
+     path: /srv/www
+     state: directory
+     mode: 0755
+      
+- name: Download WP archive
+  become: true
+  shell: wget -c https://wordpress.org/latest.tar.gz -O /latest.tar.gz
+  
+- name: Unpack WP archive
+  become: true
+  shell: tar -xz -f /latest.tar.gz -C /srv/www
+  
+- name: Remove WP archive
+  become: true
+  file: 
+    path: /latest.tar.gz
+    state: absent

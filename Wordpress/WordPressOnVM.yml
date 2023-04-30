@@ -1,0 +1,12 @@
+---
+- hosts: servers
+  name: WordPressOnVM.yml
+    
+  roles:
+
+    - apt
+    - wordpress
+    - apache
+    - db
+    - configuration
+

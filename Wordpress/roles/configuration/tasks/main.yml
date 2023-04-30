@@ -1,0 +1,26 @@
+---
+
+- name: Copy wp-config
+  become: true
+  template:
+   src: templates/wp-config.php.j2
+   dest: /srv/www/wordpress/wp-config.php
+  
+- name: Enable site
+  become: true
+  shell: sudo a2ensite wordpress
+
+- name: Enable URL rewriting
+  become: true
+  shell: sudo a2enmod rewrite
+
+- name: Disable the default “It Works” site
+  become: true
+  shell: sudo a2dissite 000-default
+  
+- name: Restart apache
+  become: true
+  service: 
+    name: apache2
+    state: reloaded
+

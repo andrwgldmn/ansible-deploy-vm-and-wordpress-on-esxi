@@ -1,0 +1,2 @@
+[servers]
+host_or_ip_address ansible_ssh_host=ssh_host ansible_ssh_user=ssh_user ansible_ssh_pass=ssh_password ansible_sudo_pass=sudo_password

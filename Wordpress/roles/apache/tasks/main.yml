@@ -1,0 +1,9 @@
+---
+
+- name: Copy WP Apache template
+  become: true
+  template:
+   src: templates/wordpress.conf.j2
+   dest: /etc/apache2/sites-available/wordpress.conf
+
+
